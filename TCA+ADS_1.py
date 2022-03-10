@@ -39,3 +39,5 @@ while True:
     print("{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
     # print("{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
     time.sleep(1)
+    
+        tca[channel].unlock()
