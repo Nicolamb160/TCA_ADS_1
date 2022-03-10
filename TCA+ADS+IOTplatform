@@ -3,6 +3,30 @@ import board
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import adafruit_tca9548a
+import paho.mqtt.client as mqtt
+
+# The callback for when the client receives a CONNACK response from the server.
+import json
+
+THINGSBOARD_HOST = 'digitalconstructionhub.ovh'
+ACCESS_TOKEN = 'ACCESSTOKEN' 
+
+# Data capture and upload interval in seconds.
+INTERVAL=1.0 
+
+# Data capture and upload interval in seconds.
+INTERVAL=1.0 
+
+sensor_data = {'strain': 0, 'volt': 0}
+next_reading = time.time() 
+
+client = mqtt.Client() 
+
+# Set access token
+client.username_pw_set(ACCESS_TOKEN) 
+
+# Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
+client.connect(THINGSBOARD_HOST, 1884, 60) 
 
 # Create I2C bus as normal
 i2c = board.I2C()  # uses board.SCL and board.SDA
@@ -31,10 +55,35 @@ ads2 = ADS.ADS1115(tca[1])
 chan0 = AnalogIn(ads1, ADS.P2, ADS.P3)
 chan1 = AnalogIn(ads2, ADS.P2, ADS.P3)
 
-print("{:>5}\t{:>5}".format("chan raw", "v"))
+# print("{:>5}\t{:>5}".format("chan raw", "v"))
 
+# while True:
+   # print("0","{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
+   # print("1","{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
+   # time.sleep(1)
 while True:
-    print("0","{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
-    print("1","{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
-    time.sleep(1)
+        strain 0 = chan0.value
+        volt 0 = chan0.voltage
+        strain 1 = chan1.value
+        voltage 2  = chan1.voltage
+        print(u"{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
+        print(u"{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
+        sensor_data['strain 0'] = strain 0
+        sensor_data['volt 0'] = volt 0
+        sensor_data['strain 1'] = strain 1
+        sensor_data['volt 1'] = volt 1
+        
+        # Sending humidity and temperature data to ThingsBoard
+        client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1) 
+        
+         next_reading += INTERVAL
+        sleep_time = next_reading-time.time()
+        if sleep_time > 0:
+            time.sleep(sleep_time) 
+            
+except KeyboardInterrupt:
+    pass 
+client.loop_stop()
+client.disconnect()
+        
 tca[channel].unlock()
