@@ -21,10 +21,6 @@ tca = adafruit_tca9548a.TCA9548A(i2c, address=0x70)
 ads1 = ADS.ADS1115(tca[0])
 ads2 = ADS.ADS1115(tca[1])
 
-# After initial setup, can just use sensors as normal.
-# while True:
-    # print(tsl1.lux, tsl2.lux)
-    # time.sleep(0.1)
 
 # Create differential input between channel 2 and 3
 chan0 = AnalogIn(ads1, ADS.P2, ADS.P3)
