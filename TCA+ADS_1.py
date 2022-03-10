@@ -25,15 +25,15 @@ for channel in range(8):
  # si addresse ==0x48 :
                     #ads1 = ADS.ADS1115()
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
-ads1 = ADS.ADS1115(tca[0])
-ads2 = ADS.ADS1115(tca[1])
+        ads1 = ADS.ADS1115(tca[0])
+        ads2 = ADS.ADS1115(tca[1])
 
 
 # Create differential input between channel 2 and 3
-chan0 = AnalogIn(ads1, ADS.P2, ADS.P3)
+        chan0 = AnalogIn(ads1, ADS.P2, ADS.P3)
 # chan1 = AnalogIn(ads1, ADS.P2, ADS.P3)
 
-print("{:>5}\t{:>5}".format("raw", "v"))
+        print("{:>5}\t{:>5}".format("raw", "v"))
 
 while True:
     print("{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
