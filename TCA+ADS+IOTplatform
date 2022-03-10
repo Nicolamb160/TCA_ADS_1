@@ -26,6 +26,8 @@ client.username_pw_set(ACCESS_TOKEN)
 # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
 client.connect(THINGSBOARD_HOST, 1884, 60) 
 
+client.loop_start()
+
 # Create I2C bus as normal
 i2c = board.I2C()  # uses board.SCL and board.SDA
 
