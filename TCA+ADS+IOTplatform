@@ -9,22 +9,22 @@ import paho.mqtt.client as mqtt
 import json
 
 THINGSBOARD_HOST = 'digitalconstruction.cloud'
-ACCESS_TOKEN = 's3zt6DTcU4fHcMG7tT8j' 
+ACCESS_TOKEN = 's3zt6DTcU4fHcMG7tT8j'
 
 # Data capture and upload interval in seconds.
-INTERVAL=2
+INTERVAL=30
 
 
 sensor_data = {'strain': 0, 'volt': 0}
-next_reading = time.time() 
+next_reading = time.time()
 
-client = mqtt.Client() 
+client = mqtt.Client()
 
 # Set access token
-client.username_pw_set(ACCESS_TOKEN) 
+client.username_pw_set(ACCESS_TOKEN)
 
 # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
-client.connect(THINGSBOARD_HOST, 1884, 60) 
+client.connect(THINGSBOARD_HOST, 1884, 60)
 
 client.loop_start()
 # Create I2C bus as normal
@@ -48,15 +48,15 @@ tca = adafruit_tca9548a.TCA9548A(i2c, address=0X70)
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
 ads1 = ADS.ADS1115(tca[0])
 ads2 = ADS.ADS1115(tca[1])
-# ads3 = ADS.ADS1115(tca[2])
-# ads4 = ADS.ADS1115(tca[3])
+ads3 = ADS.ADS1115(tca[2])
+ads4 = ADS.ADS1115(tca[3])
 
 
 # Create differential input between channel 2 and 3
 chan0 = AnalogIn(ads1, ADS.P2, ADS.P3)
 chan1 = AnalogIn(ads2, ADS.P2, ADS.P3)
-# chan2 = AnalogIn(ads3, ADS.P2, ADS.P3)
-# chan3 = AnalogIn(ads4, ADS.P2, ADS.P3)
+chan2 = AnalogIn(ads3, ADS.P2, ADS.P3)
+chan3 = AnalogIn(ads4, ADS.P2, ADS.P3)
 
 # print("{:>5}\t{:>5}".format("chan raw", "v"))
 
@@ -64,7 +64,7 @@ chan1 = AnalogIn(ads2, ADS.P2, ADS.P3)
    # print("0","{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
    # print("1","{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
    # time.sleep(1)
-   
+
 # The ADS1015 and ADS1115 both have the same gain options.
 #
 #       GAIN    RANGE (V)
@@ -79,41 +79,40 @@ chan1 = AnalogIn(ads2, ADS.P2, ADS.P3)
 gains = (2 / 3, 1, 2, 4, 8, 16)
 
 while True:
-        ads1.gain = gains[5]
-        ads2.gain = gains[5]
-        # ads3.gain = gains[5]
-        # ads4.gain = gains[5]
+ 
         strain0 = chan0.value
         volt0 = chan0.voltage
         strain1 = chan1.value
         volt1  = chan1.voltage
-        # strain2 = chan2.value
-        # volt2 = chan2.voltage
-        # strain3 = chan3.value
-        # volt3  = chan3.voltage
+        strain2 = chan2.value
+        volt2 = chan2.voltage
+        strain3 = chan3.value
+        volt3  = chan3.voltage
         print(u"{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
         print(u"{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
+        print(u"{:>5}\t{:>5.3f}".format(chan2.value, chan2.voltage))
+        print(u"{:>5}\t{:>5.3f}".format(chan3.value, chan3.voltage))
         sensor_data['strain 0'] = strain0
         sensor_data['volt 0'] = volt0
         sensor_data['strain 1'] = strain1
         sensor_data['volt 1'] = volt1
-        # sensor_data['strain 2'] = strain2
-        # sensor_data['volt 2'] = volt2
-        # sensor_data['strain 3'] = strain3
-        # sensor_data['volt 3'] = volt3
-        
+        sensor_data['strain 2'] = strain2
+        sensor_data['volt 2'] = volt2
+        sensor_data['strain 3'] = strain3
+        sensor_data['volt 3'] = volt3
+
         # Sending humidity and temperature data to ThingsBoard
-        client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1) 
-        
+        client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
+
         next_reading += INTERVAL
         sleep_time = next_reading-time.time()
         if sleep_time > 0:
-            time.sleep(sleep_time) 
-            
+            time.sleep(sleep_time)
+
 #except KeyboardInterrupt:
-    #pass 
-    
+    #pass
+
 client.loop_stop()
 client.disconnect()
-        
+
 tca[channel].unlock()
