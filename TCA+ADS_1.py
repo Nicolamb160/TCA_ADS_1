@@ -39,7 +39,25 @@ chan3 = AnalogIn(ads4, ADS.P2, ADS.P3)
 
 print("{:>5}\t{:>5}".format("chan raw", "v"))
 
+
+# The ADS1015 and ADS1115 both have the same gain options.
+#
+#       GAIN    RANGE (V)
+#       ----    ---------
+#        2/3    +/- 6.144
+#          1    +/- 4.096
+#          2    +/- 2.048
+#          4    +/- 1.024
+#          8    +/- 0.512
+#         16    +/- 0.256
+#
+gains = (2 / 3, 1, 2, 4, 8, 16)
+
 while True:
+    ads1.gain = gains[5]
+    ads2.gain = gains[5]
+    ads3.gain = gains[5]
+    ads4.gain = gains[5]
     print("0","{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
     print("1","{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
     print("0","{:>5}\t{:>5.3f}".format(chan2.value, chan2.voltage))
