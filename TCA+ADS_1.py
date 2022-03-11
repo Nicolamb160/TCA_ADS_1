@@ -27,16 +27,22 @@ tca = adafruit_tca9548a.TCA9548A(i2c, address=0X70)
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
 ads1 = ADS.ADS1115(tca[0])
 ads2 = ADS.ADS1115(tca[1])
+ads3 = ADS.ADS1115(tca[2])
+ads4 = ADS.ADS1115(tca[3])
 
 
 # Create differential input between channel 2 and 3
 chan0 = AnalogIn(ads1, ADS.P2, ADS.P3)
 chan1 = AnalogIn(ads2, ADS.P2, ADS.P3)
+chan2 = AnalogIn(ads3, ADS.P2, ADS.P3)
+chan3 = AnalogIn(ads4, ADS.P2, ADS.P3)
 
 print("{:>5}\t{:>5}".format("chan raw", "v"))
 
 while True:
     print("0","{:>5}\t{:>5.3f}".format(chan0.value, chan0.voltage))
     print("1","{:>5}\t{:>5.3f}".format(chan1.value, chan1.voltage))
+    print("0","{:>5}\t{:>5.3f}".format(chan2.value, chan2.voltage))
+    print("1","{:>5}\t{:>5.3f}".format(chan3.value, chan3.voltage))
     time.sleep(1)
 tca[channel].unlock()
