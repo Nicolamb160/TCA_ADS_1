@@ -43,8 +43,9 @@ tca = adafruit_tca9548a.TCA9548A(i2c, address=0X70)
 # ads = ADS.ADS1115(i2c)
 # you can specify an I2C adress instead of the default 0x48
 # ads1 = ADS.ADS1115(i2c, address=0x48)
- # si addresse ==0x48 :
+# si addresse ==0x48 :
                     #ads1 = ADS.ADS1115()
+                    
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
 ads1 = ADS.ADS1115(tca[0])
 ads2 = ADS.ADS1115(tca[1])
@@ -101,7 +102,7 @@ while True:
         sensor_data['strain 3'] = strain3
         sensor_data['volt 3'] = volt3
 
-        # Sending humidity and temperature data to ThingsBoard
+        # Sending strain and voltage data to ThingsBoard
         client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
 
         next_reading += INTERVAL
