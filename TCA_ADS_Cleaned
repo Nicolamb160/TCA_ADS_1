@@ -14,7 +14,6 @@ ACCESS_TOKEN = 's3zt6DTcU4fHcMG7tT8j'
 # Data capture and upload interval in seconds.
 INTERVAL=30
 
-
 sensor_data = {'strain': 0, 'volt': 0}
 next_reading = time.time()
 
@@ -26,7 +25,6 @@ client.username_pw_set(ACCESS_TOKEN)
 # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
 client.connect(THINGSBOARD_HOST, 1884, 60)
 
-client.loop_start()
 # Create I2C bus as normal
 i2c = board.I2C()  # uses board.SCL and board.SDA
 
@@ -43,9 +41,8 @@ tca = adafruit_tca9548a.TCA9548A(i2c, address=0X70)
 # ads = ADS.ADS1115(i2c)
 # you can specify an I2C adress instead of the default 0x48
 # ads1 = ADS.ADS1115(i2c, address=0x48)
-# si addresse ==0x48 :
+ # si addresse ==0x48 :
                     #ads1 = ADS.ADS1115()
-                    
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
 ads1 = ADS.ADS1115(tca[0])
 ads2 = ADS.ADS1115(tca[1])
@@ -79,8 +76,13 @@ chan3 = AnalogIn(ads4, ADS.P2, ADS.P3)
 #
 gains = (2 / 3, 1, 2, 4, 8, 16)
 
+client.loop_start()
+
 while True:
- 
+        ads1.gain = gains[5]
+        ads2.gain = gains[5]
+        ads3.gain = gains[5]
+        ads4.gain = gains[5]
         strain0 = chan0.value
         volt0 = chan0.voltage
         strain1 = chan1.value
@@ -102,7 +104,7 @@ while True:
         sensor_data['strain 3'] = strain3
         sensor_data['volt 3'] = volt3
 
-        # Sending strain and voltage data to ThingsBoard
+        # Sending humidity and temperature data to ThingsBoard
         client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
 
         next_reading += INTERVAL
