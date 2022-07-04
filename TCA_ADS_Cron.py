@@ -90,13 +90,17 @@ gains = (2 / 3, 1, 2, 4, 8, 16)
 #while True:
 strain= []
 
+N=50
+
 for channel in range(4):
     #if tca[channel].try_lock():
-    ads[channel].gain = 16
-    dv = chan[channel].voltage
-    ads[channel].gain = 1
-    v = u[channel].voltage
-    strain = dv/v*1e6*4/2.1
+    strain = 0
+    for i in range(N):
+        ads[channel].gain = 16
+        dv = chan[channel].voltage
+        ads[channel].gain = 1
+        v = u[channel].voltage
+        strain += dv/v*1e6*4/2.1
     print(u"{:>5}\t{:>5.3f}\t{:>5.3f}".format(dv, v, strain))
     #    tca[channel].unlock()
     sensor_data['strain%d' % channel] = strain
