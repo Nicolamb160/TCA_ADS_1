@@ -1,0 +1,66 @@
+import time
+import board
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+import adafruit_tca9548a
+import paho.mqtt.client as mqtt
+import json
+
+THINGSBOARD_HOST = 'digitalconstruction.cloud'
+ACCESS_TOKEN = 's3zt6DTcU4fHcMG7tT8j'
+
+sensor_data = {}
+next_reading = time.time()
+
+client = mqtt.Client()
+client.username_pw_set(ACCESS_TOKEN)
+client.connect(THINGSBOARD_HOST, 1883, 60)
+client.loop_start()
+
+# Create I2C bus
+i2c = board.I2C()
+
+# Initialize TCA9548A for each address
+addresses = [0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77]
+tca = []
+for addr in addresses:
+    tca.append(adafruit_tca9548a.TCA9548A(i2c, address=addr))
+
+# Create ADS1115 object for each channel of each TCA9548A
+ads = []
+chan = []
+u = []
+for i, t in enumerate(tca):
+    for j in range(8):
+        try:
+            t.lock(j)
+            ads.append(ADS.ADS1115(t))
+            chan.append(AnalogIn(ads[-1], ADS.P2, ADS.P3))
+            u.append(AnalogIn(ads[-1], ADS.P0, ADS.P1))
+        except ValueError:
+            # Channel is already locked
+            pass
+        except OSError:
+            # No device at this address
+            pass
+        finally:
+            t.unlock(j)
+
+# Read data from each channel and add to sensor_data dictionary
+for i in range(len(ads)):
+    dv = chan[i].voltage
+    v = u[i].voltage
+    strain = dv/v*1e6*4/2.1
+    sensor_data['strain%d' % i] = strain
+    print(u"{:>5}\t{:>5.3f}\t{:>5.3f}".format(dv, v, strain))
+
+# Publish sensor data to ThingsBoard
+client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
+
+# Wait for next reading
+sleep_time = next_reading - time.time()
+if sleep_time > 0:
+    time.sleep(sleep_time)
+
+client.loop_stop()
+client.disconnect()
